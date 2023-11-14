@@ -112,7 +112,9 @@ class FLD:
 
     # This function plots the projection line of the testing data.
     # You don't need to call this function in your submission, but you have to provide the screenshot of the plot in the report.
-    def plot_projection(self, X, y):
+    def plot_projection(self, X):
+
+        y = self.predict(X)
         plt.figure(figsize=(10, 10))
         plt.axes().set_aspect('equal')
         # set figure size
@@ -202,5 +204,4 @@ if __name__ == "__main__":
     assert accuracy > 0.65, "Accuracy of FLD should be greater than 0.65"
 
     # Plot the projection line.
-    FLD.plot_projection(X_test, y_test)
-
+    FLD.plot_projection(X_test)
