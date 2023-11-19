@@ -3,9 +3,9 @@ import numpy as np
 from pandas import DataFrame, read_csv
 import matplotlib.pyplot as plt
 from sklearn.metrics import accuracy_score
-from sklearn.tree import DecisionTreeClassifier
 
 np.random.seed(156)
+
 
 # This function computes the gini impurity of a label array.
 def gini(y):
@@ -13,10 +13,11 @@ def gini(y):
         return 0
 
     prob = np.bincount(y) / len(y)
-    np.seterr(divide = 'ignore') 
+    np.seterr(divide='ignore') 
     res = 1 - np.sum(np.square(prob))
-    np.seterr(divide = 'warn')
+    np.seterr(divide='warn')
     return res
+
 
 # This function computes the entropy of a label array.
 def entropy(y):
@@ -30,7 +31,7 @@ def entropy(y):
 
     return res
 
-        
+
 class Node:
     def __init__(self, feature, threshold, left, right, impurity, value=None):
         self.feature = feature
@@ -39,7 +40,7 @@ class Node:
         self.right = right
         self.impurity = impurity
         self.value = value
-    
+
     def is_leaf(self):
         return self.value is not None
 
@@ -51,7 +52,6 @@ class Node:
                 return self.left.predict(x)
             else:
                 return self.right.predict(x)
-    
 
 
 # The decision tree classifier class.
@@ -59,17 +59,15 @@ class Node:
 class DecisionTree():
     def __init__(self, criterion='gini', max_depth=None):
         self.criterion = criterion
-        self.max_depth = max_depth 
-    
+        self.max_depth = max_depth
+
     # This function computes the impurity based on the criterion.
     def impurity(self, y):
-        # if len(y) == 0:
-            # return 0
         if self.criterion == 'gini':
             return gini(y)
         elif self.criterion == 'entropy':
             return entropy(y)
-    
+
     # This function fits the given data using the decision tree algorithm.
     def build(self, X, y, depth):
         if depth == self.max_depth or self.impurity(y) == 0:
@@ -101,7 +99,7 @@ class DecisionTree():
                 right=self.build(X[X[:, min_feature] > min_threshold], min_right, depth + 1),
                 impurity=min_impurity
             )
-    
+
     def random_build(self, X, y, depth):
         if depth == self.max_depth or self.impurity(y) == 0:
             if len(y) == 0:
@@ -121,30 +119,6 @@ class DecisionTree():
                 right=self.random_build(X[X[:, feature] > threshold], right, depth + 1),
                 impurity=impurity
             )
-            min_impurity = np.inf
-            min_feature = None
-            min_threshold = None
-            min_left = None
-            min_right = None
-            feature = np.random.choice(X.shape[1])
-            for threshold in np.unique(X[:, feature]):
-                left = y[X[:, feature] <= threshold]
-                right = y[X[:, feature] > threshold]
-                impurity = self.impurity(left) * len(left) / len(y) + self.impurity(right) * len(right) / len(y)
-
-                if impurity < min_impurity:
-                    min_impurity = impurity
-                    min_feature = feature
-                    min_threshold = threshold
-                    min_left = left
-                    min_right = right
-            return Node(
-                feature=min_feature,
-                threshold=min_threshold,
-                left=self.build(X[X[:, min_feature] <= min_threshold], min_left, depth + 1),
-                right=self.build(X[X[:, min_feature] > min_threshold], min_right, depth + 1),
-                impurity=min_impurity
-            )
 
     def fit(self, X, y):
         self.root = self.build(X, y, 0)
@@ -155,13 +129,28 @@ class DecisionTree():
     # This function takes the input data X and predicts the class label y according to your trained model.
     def predict(self, X):
         return np.array([self.root.predict(x) for x in X])
-    
+
     def ada_predict(self, X):
         return np.array([1 if self.root.predict(x) == 1 else -1 for x in X])
-    
+
     # This function plots the feature importance of the decision tree.
     def plot_feature_importance_img(self, columns):
-        pass
+        # Draw a bar plot for feature importances
+        feature_importances = np.zeros(len(columns))
+
+        def dfs(node):
+            feature_importances[node.feature] += 1
+            if not node.is_leaf():
+                dfs(node.left)
+                dfs(node.right)
+        dfs(self.root)
+        plt.figure(figsize=(7.5, 5))
+        plt.barh(columns, feature_importances)
+        plt.title("Feature Importance")
+        # rotate the whole plot by 90 degrees
+        # plt.xticks(rotation=90)
+        plt.show()
+
 
 # The AdaBoost classifier class.
 class AdaBoost():
@@ -253,10 +242,16 @@ if __name__ == "__main__":
     y_pred = tree.predict(X_test)
     print("Accuracy (entropy with max_depth=7):", accuracy_score(y_test, y_pred))
 
+    tree = DecisionTree(criterion='gini', max_depth=15)
+    tree.fit(X_train, y_train)
+    tree.plot_feature_importance_img(train_df.columns[:-1])
+
+
+
 # AdaBoost
     print("Part 2: AdaBoost")
     # Tune the arguments of AdaBoost to achieve higher accuracy than your Decision Tree.
-    ada = AdaBoost(criterion='gini', n_estimators=50)
+    ada = AdaBoost(criterion='gini', n_estimators=20)
     ada.fit(X_train, y_train)
     y_pred = ada.predict(X_test)
     # print(y_pred)
