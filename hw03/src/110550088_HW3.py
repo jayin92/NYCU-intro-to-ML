@@ -139,10 +139,11 @@ class DecisionTree():
         feature_importances = np.zeros(len(columns))
 
         def dfs(node):
+            if node.value is not None:
+                return
             feature_importances[node.feature] += 1
-            if not node.is_leaf():
-                dfs(node.left)
-                dfs(node.right)
+            dfs(node.left)
+            dfs(node.right)
         dfs(self.root)
         plt.figure(figsize=(7.5, 5))
         plt.barh(columns, feature_importances)
@@ -242,9 +243,9 @@ if __name__ == "__main__":
     y_pred = tree.predict(X_test)
     print("Accuracy (entropy with max_depth=7):", accuracy_score(y_test, y_pred))
 
-    tree = DecisionTree(criterion='gini', max_depth=15)
-    tree.fit(X_train, y_train)
-    tree.plot_feature_importance_img(train_df.columns[:-1])
+    # tree = DecisionTree(criterion='gini', max_depth=15)
+    # tree.fit(X_train, y_train)
+    # tree.plot_feature_importance_img(train_df.columns[:-1])
 
 
 
