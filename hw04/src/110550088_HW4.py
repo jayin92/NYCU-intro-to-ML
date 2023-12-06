@@ -7,29 +7,34 @@ from sklearn.svm import SVC # This is the SVM classifier class from sklearn.
 
 # The two global variables below are the hyperparameters of the SVM with polynomial and rbf kernels.
 # You should tune them to achieve the best performance on the test set.
-degree_ = None # degree_ should be an integer.
-gamma_ = None
+degree_ = 3  # degree_ should be an integer.
+gamma_ = 0.5
+
 
 # Compute and return the Gram matrix of the given data.
 def gram_matrix(X1, X2, kernel_function):
-    pass
+    return np.array([[kernel_function(x1, x2) for x2 in X2] for x1 in X1])
+
 
 # Compute and return the linear kernel between two vectors.
 def linear_kernel(x1, x2):
-    pass
+    return np.dot(x1, x2)
+
 
 # Compute and return the polynomial kernel between two vectors.
 def polynomial_kernel(x1, x2, degree=degree_):
-    pass
+    return np.power(np.dot(x1, x2), degree)
+
 
 # Compute and return the rbf kernel between two vectors.  
 def rbf_kernel(x1, x2, gamma=gamma_):
-    pass
+    return np.exp(-gamma * (np.linalg.norm(x1 - x2) ** 2))
+
 
 # Do not modify the main function architecture.
 # You can only modify the hyperparameter C of the SVC class.
 if __name__ == "__main__":
-# Data Loading
+    # Data Loading
     train_df = DataFrame(read_csv("train.csv"))
     test_df = DataFrame(read_csv("test.csv"))
     X_train = train_df.drop(["target"], axis=1)
@@ -46,7 +51,7 @@ if __name__ == "__main__":
     X_test = StandardScaler().fit_transform(X_test)
 
     # Tune the hyperparameter (C) of the SVM with your linear kernel here.
-    C_ = None
+    C_ = 4
     svc = SVC(kernel='precomputed', C=C_)
     svc.fit(gram_matrix(X_train, X_train, linear_kernel), y_train)
     y_pred = svc.predict(gram_matrix(X_test, X_train, linear_kernel))
@@ -55,7 +60,7 @@ if __name__ == "__main__":
 
     # Tune the hyperparameter (degree) by the global variable degree_ of your polynomial_kernel function.
     # Tune the hyperparameter (C) of the SVM with your polynomial kernel here.
-    C_ = None
+    C_ = 1
     svc = SVC(kernel='precomputed', C=C_)
     svc.fit(gram_matrix(X_train, X_train, polynomial_kernel), y_train)
     y_pred = svc.predict(gram_matrix(X_test, X_train, polynomial_kernel))
@@ -63,7 +68,7 @@ if __name__ == "__main__":
 
     # Tune the hyperparameter (gamma) by the global variable gamma_ of your rbf_kernel function.
     # Tune the hyperparameter (C) of the SVM with your rbf kernel here.
-    C_ = None
+    C_ = 1
     svc = SVC(kernel='precomputed', C=C_)
     svc.fit(gram_matrix(X_train, X_train, rbf_kernel), y_train)
     y_pred = svc.predict(gram_matrix(X_test, X_train, rbf_kernel))
