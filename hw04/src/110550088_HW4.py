@@ -23,7 +23,7 @@ def linear_kernel(x1, x2):
 
 # Compute and return the polynomial kernel between two vectors.
 def polynomial_kernel(x1, x2, degree=degree_):
-    return np.power(np.dot(x1, x2), degree)
+    return np.power(np.dot(x1, x2)+1, degree)
 
 
 # Compute and return the rbf kernel between two vectors.  
